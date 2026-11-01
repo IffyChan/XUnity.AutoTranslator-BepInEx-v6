@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Title>XUnity AutoTranslator for Unity</Title>
@@ -7,7 +7,7 @@
 		<PackageTags>unity;xunity;machine translation</PackageTags>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<DevelopmentDependency>True</DevelopmentDependency>
-		<TargetFrameworks>net35;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
@@ -20,7 +20,7 @@
 		<DocumentationFile>bin\Release\$(TargetFramework)\XUnity.AutoTranslator.Plugin.Core.xml</DocumentationFile>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)'=='net35'">
+	<PropertyGroup Condition="'$(TargetFramework)'!='net6.0'">
 		<DefineConstants>MANAGED</DefineConstants>
 	</PropertyGroup>
 
@@ -28,8 +28,12 @@
 		<DefineConstants>IL2CPP</DefineConstants>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net35'">
+	<ItemGroup Condition="'$(TargetFramework)'!='net6.0'">
 		<ProjectReference Include="..\UnityEngine\UnityEngine.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+		<PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
@@ -58,10 +62,6 @@
 		<Reference Include="UnityEngine.UnityWebRequestWWWModule">
 			<HintPath>..\..\libs\Proxies\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
 		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="All" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -107,7 +107,7 @@
 	</ItemGroup>
 
 	<!-- No idea why I need one for each -->
-	<Target Name="ILRepackNET460" AfterTargets="Build" Condition="'$(TargetFramework)'=='net6.0'">
+	<Target Name="ILRepackNET460" AfterTargets="Build" Condition="false">
 		<PropertyGroup>
 			<WorkingDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)</WorkingDirectory>
 		</PropertyGroup>
@@ -115,10 +115,11 @@
 			<InputAssemblies Include="ICSharpCode.SharpZipLib.dll" />
 		</ItemGroup>
 		<Message Text="MERGING: @(InputAssemblies)-&gt;'%(Filename)') into $(OutputAssembly)" Importance="High" />
-		<ILRepack OutputType="$(OutputType)" MainAssembly="$(AssemblyName).dll" OutputAssembly="$(AssemblyName).dll" InputAssemblies="@(InputAssemblies)" InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)" WorkingDirectory="$(WorkingDirectory)" />
+		<ILRepack OutputFile="$(WorkingDirectory)\$(AssemblyName).merged.dll" InputAssemblies="$(WorkingDirectory)\$(AssemblyName).dll;@(InputAssemblies->'$(WorkingDirectory)\%(Filename)%(Extension)')" Internalize="true" />
+		<Move SourceFiles="$(WorkingDirectory)\$(AssemblyName).merged.dll" DestinationFiles="$(WorkingDirectory)\$(AssemblyName).dll" OverwriteReadOnlyFiles="true" />
 	</Target>
 
-	<Target Name="ILRepackNET35" AfterTargets="Build" Condition="'$(TargetFramework)'=='net35'">
+	<Target Name="ILRepackNET35" AfterTargets="Build" Condition="false">
 		<PropertyGroup>
 			<WorkingDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)</WorkingDirectory>
 		</PropertyGroup>
@@ -126,11 +127,12 @@
 			<InputAssemblies Include="ICSharpCode.SharpZipLib.dll" />
 		</ItemGroup>
 		<Message Text="MERGING: @(InputAssemblies)-&gt;'%(Filename)') into $(OutputAssembly)" Importance="High" />
-		<ILRepack OutputType="$(OutputType)" MainAssembly="$(AssemblyName).dll" OutputAssembly="$(AssemblyName).dll" InputAssemblies="@(InputAssemblies)" InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)" WorkingDirectory="$(WorkingDirectory)" />
+		<ILRepack OutputFile="$(WorkingDirectory)\$(AssemblyName).merged.dll" InputAssemblies="$(WorkingDirectory)\$(AssemblyName).dll;@(InputAssemblies->'$(WorkingDirectory)\%(Filename)%(Extension)')" Internalize="true" />
+		<Move SourceFiles="$(WorkingDirectory)\$(AssemblyName).merged.dll" DestinationFiles="$(WorkingDirectory)\$(AssemblyName).dll" OverwriteReadOnlyFiles="true" />
 	</Target>
 
 	<!-- PostBuildEvent -->
-	<Target Name="PostBuildNET35" AfterTargets="ILRepackNET35" Condition="'$(TargetFramework)'=='net35'">
+	<Target Name="PostBuildNET35" AfterTargets="Build" Condition="false">
 		<GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
 			<Output TaskParameter="Assemblies" ItemName="Targets" />
 		</GetAssemblyIdentity>
@@ -140,7 +142,7 @@
 		<Exec Command="if $(ConfigurationName) == Release (&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.AutoTranslator.Plugin.Core.dll&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.AutoTranslator.Plugin.Core.xml&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.AutoTranslator.Plugin.Core.pdb&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.AutoTranslator.Plugin.ExtProtocol.dll&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.AutoTranslator.Plugin.ExtProtocol.xml&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.AutoTranslator.Plugin.ExtProtocol.pdb&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.Common.dll&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.Common.xml&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.Common.pdb&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.ResourceRedirector.dll&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.ResourceRedirector.xml&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   XCOPY /Y /I &quot;$(TargetDir)XUnity.ResourceRedirector.pdb&quot; &quot;$(SolutionDir)dist\Developer\Developer\&quot;&#xD;&#xA;   COPY /Y &quot;$(SolutionDir)README.md&quot; &quot;$(SolutionDir)dist\Developer\Developer\README (AutoTranslator).md&quot;&#xD;&#xA;   &quot;$(SolutionDir)tools\xzip.exe&quot; &quot;$(SolutionDir)dist\Developer&quot; &quot;$(SolutionDir)dist\XUnity.AutoTranslator-Developer-@(VersionNumber).zip&quot;&#xD;&#xA;)" />
 	</Target>
 
-	<Target Name="PostBuildNET472" AfterTargets="ILRepackNET460" Condition="'$(TargetFramework)'=='net6.0'">
+	<Target Name="PostBuildNET472" AfterTargets="ILRepackNET460" Condition="false">
 		<GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
 			<Output TaskParameter="Assemblies" ItemName="Targets" />
 		</GetAssemblyIdentity>
