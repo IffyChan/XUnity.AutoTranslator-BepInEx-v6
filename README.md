@@ -1,4 +1,14 @@
-﻿# XUnity Auto Translator
+# XUnity Auto Translator (BepInEx 6 Modern Fork)
+
+<p align="left">
+  <a href="#xunity-auto-translator-bepinex-6-modern-fork"><b>English</b></a> |
+  <a href="#русская-версия-кратко"><b>Русский (кратко)</b></a>
+</p>
+
+> [!NOTE]
+> **BepInEx 6 Modern Fork**: This is a maintained fork of [bbepis/XUnity.AutoTranslator](https://github.com/bbepis/XUnity.AutoTranslator) providing native support for **BepInEx 6 Unity Mono** (for modern Unity 2021+ and Unity 6 Mono games like *Obenseuer*).
+> 
+> In BepInEx 6, Mono plugins must inherit from `BepInEx.Unity.Mono.BaseUnityPlugin` (in `BepInEx.Unity.Mono.dll`). Legacy BepInEx 5 plugin assemblies are ignored by the BepInEx 6 chainloader. This fork provides native `.netstandard2.0` plugins for BepInEx 6 Unity Mono, full HarmonyX compatibility, and updated online translation endpoints.
 
 ## Index
  * [Introduction](#introduction)
@@ -76,8 +86,30 @@ The file structure should like like this
 
 **NOTE:** The `Mono.Cecil.dll` file placed in the ReiPatcher directory is not the same file as is placed in the Managed directory.
 
-### BepInEx Plugin
-REQUIRES: [BepInEx plugin manager](https://github.com/BepInEx/BepInEx) (follow its installation instructions first!). 
+### BepInEx 6 Unity Mono Plugin (Modern Mono Games)
+REQUIRES: [BepInEx 6 Bleeding Edge Unity Mono](https://builds.bepis.io/projects/bepinex_be) (e.g. for Obenseuer, Unity 6 Mono games).
+
+1. Download `XUnity.AutoTranslator-BepInEx-UnityMono-{VERSION}.zip` from [releases](../../releases).
+2. Extract directly into the game directory, such that the plugin dlls are placed in `BepInEx/` folder.
+3. Launch the game.
+
+The file structure should look like this:
+```
+{GameDirectory}/BepInEx/core/XUnity.Common.dll
+{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.BepInEx.UnityMono.dll
+{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.Core.dll
+{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
+{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.Common.dll
+{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/ExIni.dll
+{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/Translators/{Translator}.dll
+{GameDirectory}/BepInEx/plugins/XUnity.ResourceRedirector/XUnity.ResourceRedirector.BepInEx.UnityMono.dll
+{GameDirectory}/BepInEx/plugins/XUnity.ResourceRedirector/XUnity.ResourceRedirector.dll
+{GameDirectory}/BepInEx/config/AutoTranslatorConfig.ini (auto generated!)
+{GameDirectory}/BepInEx/Translation/ (auto generated!)
+```
+
+### BepInEx 5 Plugin (Legacy Mono Games)
+REQUIRES: [BepInEx 5 plugin manager](https://github.com/BepInEx/BepInEx) (follow its installation instructions first!).
 
  1. Download XUnity.AutoTranslator-BepInEx-{VERSION}.zip from [releases](../../releases).
  2. Extract directly into the game directory, such that the plugin dlls are placed in BepInEx folder.
@@ -2653,3 +2685,40 @@ Note that this implementation uses a `SimpleTextTranslationCache` to lookup tran
  * When loading text translation files, it supports the same text format that is otherwise used by the plugin.
 
 Once you have implemented one of these classes, you just need to instantiate it and it will do it's magic. 
+
+
+---
+
+## Русская версия (кратко)
+
+[English Version](#xunity-auto-translator-bepinex-6-modern-fork) | [Подробная документация (на англ.)](#index)
+
+### О данном форке
+Этот репозиторий — форк [XUnity.AutoTranslator](https://github.com/bbepis/XUnity.AutoTranslator), созданный для добавления нативной поддержки **BepInEx 6 Unity Mono** (для современных Mono-игр на Unity 2021+ и Unity 6, таких как *Obenseuer*).
+
+В BepInEx 6 базовый класс плагина перенесён в сборку `BepInEx.Unity.Mono.dll` (`namespace BepInEx.Unity.Mono, BaseUnityPlugin`). Оригинальные плагины BepInEx 5 молча игнорируются новым чейнлоадером BepInEx 6. В этом форке реализованы современные модули `.netstandard2.0` для Unity Mono, поддержка HarmonyX 2.x и обновлённые эндпоинты онлайн-перевода.
+
+### Какой архив скачивать в [Releases](../../releases)?
+* **`XUnity.AutoTranslator-BepInEx-UnityMono-{VERSION}.zip`** — для **BepInEx 6 Unity Mono** (игры Unity 2021+ и Unity 6 Mono, например *Obenseuer*).
+* **`XUnity.AutoTranslator-BepInEx-IL2CPP-{VERSION}.zip`** — для **BepInEx 6 IL2CPP** (игры с нативным кодом IL2CPP).
+* **`XUnity.AutoTranslator-BepInEx-{VERSION}.zip`** — для классического **BepInEx 5** (старые игры на Unity 4/5/2017/2018).
+
+### Быстрая установка (BepInEx 6 Unity Mono):
+1. Установите [BepInEx 6 Bleeding Edge Unity Mono](https://builds.bepis.io/projects/bepinex_be) в папку с игрой.
+2. Скачайте архив `XUnity.AutoTranslator-BepInEx-UnityMono-{VERSION}.zip` со страницы [Releases](../../releases).
+3. Распакуйте архив в корень игры (папки `BepInEx/plugins/` и `BepInEx/core/` объединятся с каталогом игры).
+4. Запустите игру. При старте автоматически создадутся файл настроек `BepInEx/config/AutoTranslatorConfig.ini` и папка переводов `BepInEx/Translation/`.
+
+### Управление в игре:
+* `Alt + 0` — открыть / закрыть меню настроек AutoTranslator.
+* `Alt + T` — принудительно перевести все отображаемые тексты на экране.
+* `Alt + R` — перезагрузить файлы переводов из каталога `Translation/`.
+
+### Сборка из исходников:
+Для автоматической сборки проекта под BepInEx 6 Unity Mono выполните в PowerShell:
+```powershell
+pwsh ./build-unitymono.ps1
+```
+Скрипт скомпилирует ядро, плагины и эндпоинты под `.netstandard2.0`, упакует их в zip-дистрибутив и положит в папку `dist/`.
+
+Подробная документация по всем параметрам конфигурации, эндпоинтам и ручным переводам доступна в [англоязычной секции выше](#index).
