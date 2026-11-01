@@ -19,14 +19,27 @@ dotnet build "$rootDir\src\XUnity.AutoTranslator.Plugin.Core\XUnity.AutoTranslat
 dotnet build "$rootDir\src\XUnity.AutoTranslator.Plugin.BepInEx.UnityMono\XUnity.AutoTranslator.Plugin.BepInEx.UnityMono.csproj" -c $Configuration -f netstandard2.0 -p:SolutionDir="$solDir"
 dotnet build "$rootDir\src\XUnity.ResourceRedirector.BepInEx.UnityMono\XUnity.ResourceRedirector.BepInEx.UnityMono.csproj" -c $Configuration -f netstandard2.0 -p:SolutionDir="$solDir"
 
+Write-Host "Building managed translator endpoints..."
+$translators = @(
+    "GoogleTranslate", "BaiduTranslate", "BingTranslate", "BingTranslateLegitimate", "CustomTranslate",
+    "DeepLTranslate", "ezTransXP", "GoogleTranslateCompat", "GoogleTranslateLegitimate",
+    "LecPowerTranslator15", "LingoCloudTranslate", "PapagoTranslate", "ReverseTranslator",
+    "WatsonTranslate", "YandexTranslate"
+)
+foreach ($t in $translators) {
+    dotnet build "$rootDir\src\Translators\$t\$t.csproj" -c $Configuration -f netstandard2.0 -p:SolutionDir="$solDir"
+}
+
 Write-Host "Assembling distribution directory at $distDir..."
 if (Test-Path $distDir) {
     Remove-Item -Recurse -Force $distDir
 }
 
+$translatorsTargetDir = Join-Path $pluginDir "Translators"
 New-Item -ItemType Directory -Force -Path $pluginDir | Out-Null
 New-Item -ItemType Directory -Force -Path $redirectorDir | Out-Null
 New-Item -ItemType Directory -Force -Path $coreDir | Out-Null
+New-Item -ItemType Directory -Force -Path $translatorsTargetDir | Out-Null
 
 $binAuto = "$rootDir\src\XUnity.AutoTranslator.Plugin.BepInEx.UnityMono\bin\$Configuration\netstandard2.0"
 $binCore = "$rootDir\src\XUnity.AutoTranslator.Plugin.Core\bin\$Configuration\netstandard2.0"
@@ -44,6 +57,11 @@ Copy-Item "$libs\ExIni.dll" $pluginDir
 
 if (Test-Path "$binCore\XUnity.AutoTranslator.Plugin.ExtProtocol.dll") {
     Copy-Item "$binCore\XUnity.AutoTranslator.Plugin.ExtProtocol.dll" $pluginDir
+}
+
+# Copy Translators
+if (Test-Path "$rootDir\dist\Translators") {
+    Copy-Item -Recurse -Force "$rootDir\dist\Translators\*" $translatorsTargetDir
 }
 
 # Copy ResourceRedirector

@@ -54,6 +54,11 @@ namespace XUnity.AutoTranslator.Plugin.BepInEx
 
       public void SaveConfig()
       {
+         var dir = Path.GetDirectoryName( _configPath );
+         if( !string.IsNullOrEmpty( dir ) && !Directory.Exists( dir ) )
+         {
+            Directory.CreateDirectory( dir );
+         }
          _file.Save( _configPath );
       }
 
